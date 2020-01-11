@@ -19,6 +19,10 @@ and `response type` can be one of:
 * 0x03 (Session accepted)
 * 0x04 (Message)
 
+Each client has a [RSA](https://en.wikipedia.org/wiki/RSA_%28cryptosystem%29) public / private key pair.
+Session keys are generated with [Diffie-Hellman key exchange](https://en.wikipedia.org/wiki/Diffie–Hellman_key_exchange).
+Messages are encrypted with [AES-256](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard)
+
 ### Request types
 
 #### Login
@@ -39,7 +43,7 @@ The message consists of the public key of the client which initiated the request
 #### Message
 
 A message can only be send to a client this client has a open session with.
-The message payload is the other client's public key followed by the message text.
+The message payload is the other client's public key followed by the message text encrypted with the key obtained with DH key exchange.
 
 ### Response types
 
