@@ -92,6 +92,7 @@ if __name__ == '__main__':
                 read_list.append(client)
                 print('{} connected'.format(addr))
             else:
+                # Reads BUFFER_SIZE bytes from each socket so that other clients won't have to wait too long
                 data = s.recv(BUFFER_SIZE)
                 request_type, length, msg = active_requests[s.fileno()] if s.fileno() in active_requests else (None, -5, b'')
                 index = 0
