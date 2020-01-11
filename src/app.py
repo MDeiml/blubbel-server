@@ -7,7 +7,8 @@ class RequestHandler:
     def __init__(self):
         pass
 
-    def handle_request(self, request_type, msg):
+    # This gets called for every received request
+    def handle_request(self, sender_id, request_type, msg):
         # for now just print request
         print(request_type, msg)
 
@@ -67,7 +68,7 @@ if __name__ == '__main__':
                         length -= new_index - index
                         index = new_index
                         if length == 0:
-                            handler.handle_request(request_type, msg)
+                            handler.handle_request(socket.fileno(), request_type, msg)
                             msg = b''
                             length = -5
                             request_type = None
