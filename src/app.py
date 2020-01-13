@@ -7,6 +7,17 @@ MAX_CLIENTS = 100
 # maximum number of bytes to read from a client in one pass
 BUFFER_SIZE = 1024
 
+# TODO: @MDeiml please change the names so that requests and responses can be distinguished
+# request types
+LOGIN = 0x01
+START_SESSION = 0x02
+ACCEPT_SESSION = 0x03
+MESSAGE = 0x04
+# response types
+LOGIN_ACCEPTED = LOGIN
+SESSION_REQUESTED = START_SESSION
+SESSION_ACCEPTED = ACCEPT_SESSION
+
 KEY_LENGTH = 1024
 PORT = 8000
 
@@ -22,7 +33,7 @@ class RequestHandler:
     # This gets called for every received request
     def handle_request(self, sender_socket, request_type, msg):
         print(request_type, msg)
-        if request_type == 0x01:
+        if request_type == LOGIN:
             if len(msg) != KEY_LENGTH // 8:
                 # Key length mismatch
                 # TODO: Respond with error
