@@ -1,54 +1,60 @@
 # blubbel-server
 Server application for an open-source, secure, peer-to-peer messenger.
+The server is only responsible for the initial ip-address and port exchange, messages
+are handled purely P2P.
 See the wiki for more details: https://github.com/MDeiml/blubbel-server/wiki
 
 ## Protocol
 
-Requests / responses always have the following layout
-`[request type / response type (1 byte)][message length (4 bytes)][message (X bytes]`
+Requests / responses always have the following layout:
+
+* requests: `[type (1 byte) | id (256 bytes)]`
+* responses: `[status-code (1 byte) | msg (0-X bytes)]`
 
 Where `request type` can be one of:
-* 0x01 (Login)
-* 0x02 (Start session)
-* 0x03 (Accept session)
-* 0x04 (Message)
+* 0x01 (register id)
+* 0x02 (resolve id)
+* 0x03 (deny request)
 
 and `response type` can be one of:
-* 0x01 (Login accepted)
-* 0x02 (Session requested)
-* 0x03 (Session accepted)
-* 0x04 (Message)
+* 0x00 (OK) : registered id + timestamp
+* 0x01 (id resolved) : resolved id + ip + port (+ timestamp)
+* 0x02 (inform) : requesting id
+* 0x10 (registration error) : error msg
+* 0x20 (resolving error) : error msg
+
 
 Each client has a [RSA](https://en.wikipedia.org/wiki/RSA_%28cryptosystem%29) public / private key pair.
-Session keys are generated with [Diffie-Hellman key exchange](https://en.wikipedia.org/wiki/Diffie–Hellman_key_exchange).
-Messages are encrypted with [AES-256](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard)
+
+TODO: implement/design authentication for network traffic
 
 ### Request types
 
-#### Login
+#### register
+A client registers his ip and open port at the server.
+The server confirms a successfull registration with a timestamp (valid time of registration).
 
-A login must be requested after connecting before any other request type is allowed.
-The login message payload consists only of the users public key.
+#### resolve
+If a client A wants to start communication with client B, A sends a resolve request for id(B) to the Server. At success
+the server responds with the associated ip and port.
 
-#### Start session
-
-A "Start session" request initiates the key exchange between two clients.
-The message consists of the other clients public key and `g^a mod p` encrypted with this clients public key, where `g` and `p` are the base and modulus of the DH key exchange and `a` is this clients secret.
-
-#### Accept session
-
-A "Accept session" request from the other client must follow a "Start session" request. After this request a communication session should be open.
-The message consists of the public key of the client which initiated the request and `g^b mod p` encrypted with this clients public key. `b` is this clients secret.
-
-#### Message
-
-A message can only be send to a client this client has a open session with.
-The message payload is the other client's public key followed by the message text encrypted with the key obtained with DH key exchange.
+#### deny
+If a client A does want to start communication with client B (resolve request), a sends a deny request. Otherwise a resolve request.
 
 ### Response types
-
 The server does not inspect the contents of request with type "Session requested", "Session accepted" and "Message", but only refers the message to the requested recipient and exchanges the sender's public key for the recipient's public key.
 
-#### Login accepted
+#### OK
+The server responds at successfull registration with the registered id + timestamp
 
-The reponse for the "Login" request. This response contains no message.
+#### id resolved
+Server responds with the requested id + ip + port
+
+#### inform
+Server informs client that his data has been requested
+
+#### registration error
+TODO
+
+#### resolving error
+TODO
